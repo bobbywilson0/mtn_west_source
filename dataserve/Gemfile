@@ -1,0 +1,7 @@
+source :gemcutter
+
+gem 'sinatra'
+gem 'shotgun'
+gem 'json'
+gem 'mongo'
+gem 'bson_ext'

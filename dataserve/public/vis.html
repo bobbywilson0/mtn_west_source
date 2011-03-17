@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title>Repository Vis</title>
+    <script type="text/javascript" src="jquery-1.5.min.js"></script>
+    <script type="text/javascript" src="protovis.min.js"></script>
+  </head>
+  <body>
+
+  <script type="text/javascript">
+    $(function() {
+      var url = "http://localhost:9393/ruby/commits.json";
+      $.get(url, function(data) {
+        var commit_width = 5600;
+        var commit_height = 500;
+        var barWidth = 1;
+        var gap = 0;
+        var sum = 0;
+        var sums = data.map(function(d) { return { 'delta': d.additions - d.deletions, 'date': d.date }});
+        var running_delta = [];
+        $.each(sums, function(index, el) { 
+          sum += el.delta;
+          running_delta.push({ 'sum': sum, 'date': el.date }); 
+        });
+        var deltas = running_delta.map(function(d) { return d.sum})
+        var sum_scale = pv.Scale.linear(deltas).range(0, 200);
+        var dates = [];
+      new pv.Panel().width(commit_width).height(commit_height+5)
+        .add(pv.Bar)
+        .data(running_delta)
+        .bottom(commit_height/2)
+        .width(barWidth-gap)
+        .height(function(d) { return sum_scale(d.sum) })
+        .left(function(d) { return this.index * barWidth + 25 })
+        .anchor("bottom")
+        .add(pv.Label)
+        .text(function(d) { date = new Date(d.date); return date.getFullYear() })
+        .visible(function(d) { 
+          date = new Date(d.date); 
+
+          if (dates.indexOf(date.getFullYear()) == -1) {
+          dates.push(date.getFullYear());
+            return true;
+            } else {
+            return false;
+          }
+        })
+        .root.render();
+      }).error(function(e) { console.log(e); })
+    });
+    </script>
+  </body>
+</html>
